@@ -1,88 +1,74 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Penjual - {{ $penjual->Nama_Penjual }}</title>
-</head>
-<body style="font-family: sans-serif; padding: 20px;">
+@extends('layouts.app')
+@section('title', 'Detail Penjual')
 
-    <h2>Detail Penjual: <strong>{{ $penjual->Nama_Penjual }}</strong></h2>
+@section('content')
+@php
+    $ulasanList = $penjual->ulasan->sortByDesc('created_at')->values();
+    $rata = $ulasanList->avg('Rating') ?? 0;
+@endphp
 
-    <p><strong>Deskripsi:</strong> {{ $penjual->Deskripsi ?? 'Tidak ada deskripsi.' }}</p>
-    <p><strong>Alamat:</strong> {{ $penjual->Alamat_Penjual ?? 'Tidak ada alamat.' }}</p>
-    <p><strong>Kontak:</strong> {{ $penjual->No_Telp_Penjual ?? 'Tidak ada kontak.' }}</p>
+<div class="max-w-[1120px] mx-auto px-5 py-10">
+    <h1 class="text-3xl font-bold mb-1.5">Detail Penjual</h1>
+    <p class="text-sm text-[#6b7385] mb-7">Pengunjung dapat melihat ulasan dan langsung memberi ulasan tanpa login.</p>
 
-    <div style="margin: 20px 0;">
-        <!-- Tombol untuk memberikan ulasan -->
-        <a href="{{ route('ulasan.create', $penjual->Id_Penjual) }}" 
-           style="display: inline-block; padding: 8px 12px; background-color: #0d6efd; color: white; text-decoration: none; border-radius: 4px;">
-           Beri Ulasan
-        </a>
-
-        <!-- Tombol kembali ke dashboard -->
-        <a href="{{ route('dashboard') }}" 
-           style="display: inline-block; padding: 8px 12px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px;">
-           Kembali ke Dashboard
-        </a>
-    </div>
-
-    <hr style="margin: 20px 0;">
-
-    <!-- SECTION DAFTAR ULASAN -->
-    <h3>Daftar Ulasan ({{ $penjual->ulasan->count() }})</h3>
-
-    <div id="reviewList" style="max-width: 600px;">
-        @forelse($penjual->ulasan as $index => $u)
-            <!-- Jika ulasan ke-4 dan seterusnya (index >= 3), sembunyikan dulu -->
-            <div class="review-item {{ $index >= 3 ? 'extra-review' : '' }}" 
-                 style="border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 6px; background-color: #f9f9f9; {{ $index >= 3 ? 'display: none;' : '' }}">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong>{{ $u->Nama_Pembeli }}</strong>
-                    <span style="color: #f39c12; font-weight: bold;">
-                        @for($i = 1; $i <= 5; $i++)
-                            {{ $i <= $u->Rating ? '★' : '☆' }}
-                        @endfor
-                        ({{ $u->Rating }}/5)
-                    </span>
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-7 items-start">
+        <div>
+            <div class="border border-[#dde1ea] rounded-[32px] p-7 bg-white">
+                <div class="flex items-center gap-5">
+                    <div class="w-[138px] h-[106px] shrink-0 rounded-[22px] bg-[linear-gradient(180deg,#82b4ff,#cfc4ff)] grid place-items-center text-[#2878eb] font-bold">TOKO</div>
+                    <div>
+                        <h2 class="text-[22px] font-bold mb-1.5">{{ $penjual->Nama_Penjual }}</h2>
+                        <p class="text-sm text-[#6b7385]">{{ $penjual->Alamat_Penjual ?? '-' }} • {{ $penjual->No_Telp_Penjual ?? '-' }}</p>
+                        <p class="mt-2.5 text-[#f5a623] font-['Libre_Baskerville',serif]">
+                            ★ {{ number_format($rata, 1) }} • {{ $ulasanList->count() }} ulasan
+                        </p>
+                    </div>
                 </div>
+                <p class="mt-5 text-sm text-[#6b7385]">{{ $penjual->Deskripsi ?? 'Tidak ada deskripsi.' }}</p>
+            </div>
 
-                <p style="margin: 8px 0; color: #333;">{{ $u->Ulasan }}</p>
+            <div class="border border-[#dde1ea] rounded-[40px] p-7 bg-white mt-6">
+                <h2 class="text-[22px] font-bold mb-4">Ulasan Pembeli</h2>
 
-                @if($u->created_at)
-                    <small style="color: #888;">{{ $u->created_at->format('d M Y, H:i') }}</small>
+                @forelse($ulasanList as $index => $u)
+                    <div class="review-item flex items-start gap-3.5 py-4 {{ $index >= 3 ? 'extra-review hidden' : '' }}">
+                        <span class="w-5 h-5 rounded-full bg-[#2878eb] shrink-0 mt-1"></span>
+                        <div class="flex-1 text-sm">
+                            <b class="block mb-1">{{ $u->Nama_Pembeli }}</b>
+                            <span class="text-[#f5a623]">{{ str_repeat('★', $u->Rating) }}</span>
+                            <p class="mt-1">{{ $u->Ulasan }}</p>
+                        </div>
+                        <span class="text-xs text-[#6b7385]">{{ $u->created_at?->locale('id')->diffForHumans() }}</span>
+                    </div>
+                @empty
+                    <p class="py-8 text-center text-[#6b7385]">Belum ada ulasan. Jadilah yang pertama!</p>
+                @endforelse
+
+                @if($ulasanList->count() > 3)
+                    <button id="toggleReviewBtn" type="button"
+                            class="mt-2 px-4 py-2 border border-[#dde1ea] rounded-lg text-sm font-bold cursor-pointer">
+                        Lihat Selengkapnya ({{ $ulasanList->count() - 3 }} ulasan lagi)
+                    </button>
                 @endif
             </div>
-        @empty
-            <p style="color: #666; italic;">Belum ada ulasan untuk penjual ini.</p>
-        @endforelse
+        </div>
+
+        <div>
+            @include('form-ulasan')
+        </div>
     </div>
+</div>
 
-    <!-- TOMBOL SELENGKAPNYA (Hanya muncul jika ulasan lebih dari 3) -->
-    @if($penjual->ulasan->count() > 3)
-        <button id="toggleReviewBtn" onclick="toggleReviews()" 
-                style="padding: 8px 16px; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: bold;">
-            Lihat Selengkapnya ({{ $penjual->ulasan->count() - 3 }} ulasan lagi)
-        </button>
-
-        <script>
-            function toggleReviews() {
-                const extraReviews = document.querySelectorAll('.extra-review');
-                const btn = document.getElementById('toggleReviewBtn');
-                
-                let isHidden = extraReviews[0].style.display === 'none';
-                
-                extraReviews.forEach(card => {
-                    card.style.display = isHidden ? 'block' : 'none';
-                });
-                
-                btn.innerText = isHidden 
-                    ? 'Tampilkan Lebih Sedikit' 
-                    : 'Lihat Selengkapnya ({{ $penjual->ulasan->count() - 3 }} ulasan lagi)';
-            }
-        </script>
-    @endif
-
-</body>
-</html>
+@if($ulasanList->count() > 3)
+<script>
+    const btn = document.getElementById('toggleReviewBtn');
+    const sisa = {{ $ulasanList->count() - 3 }};
+    btn.addEventListener('click', function () {
+        const extra = document.querySelectorAll('.extra-review');
+        const sembunyi = extra[0].classList.contains('hidden');
+        extra.forEach(function (el) { el.classList.toggle('hidden', !sembunyi); });
+        btn.textContent = sembunyi ? 'Tampilkan Lebih Sedikit' : 'Lihat Selengkapnya (' + sisa + ' ulasan lagi)';
+    });
+</script>
+@endif
+@endsection

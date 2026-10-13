@@ -1,43 +1,55 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Pembeli</title>
-</head>
-<body style="font-family: sans-serif; padding: 20px;">
+@extends('layouts.app')
+@section('title', 'Beranda')
 
-    <nav style="margin-bottom: 20px;">
-        <a href="{{ route('register') }}">Register Penjual</a> | 
-        <a href="{{ route('login') }}">Login Penjual</a>
-    </nav>
+@section('content')
+<section class="bg-[linear-gradient(180deg,#82b4ff,#cfc4ff)] rounded-[40px] mx-4 md:mx-10 my-6 px-6 md:px-11 py-12">
+    <h1 class="font-['Anton',sans-serif] font-normal text-4xl md:text-[44px] leading-tight">Temukan Penjual<br>Terbaik dari Ulasan Pembeli</h1>
+    <p class="text-[#6b7385] mt-2.5 mb-4">Bantu pembeli lain dengan memberikan ulasan jujur.</p>
+    <form onsubmit="return false" class="flex max-w-[470px]">
+        <input type="text" id="cari" placeholder="Cari nama penjual atau alamat..."
+               class="flex-1 min-w-0 px-4 py-3.5 border border-[#dde1ea] rounded-l-[10px] outline-none bg-white text-sm">
+        <button type="submit" class="w-12 bg-[#2878eb] text-white rounded-r-[10px]">⌕</button>
+    </form>
+</section>
 
-    <h2>Dashboard Pembeli</h2>
-    <h3>Daftar Penjual</h3>
+<section id="daftar-penjual" class="px-5 md:px-[55px] pb-12">
+    <h2 class="text-[26px] font-bold">Daftar Penjual</h2>
+    <p class="text-sm text-[#6b7385] mb-5">Pilih penjual lalu isi ulasan tanpa login.</p>
 
-    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-        @forelse($penjualList as $p)
-            <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 240px; background-color: #f9f9f9;">
-                <h4 style="margin-top: 0;">{{ $p->Nama_Penjual }}</h4>
-                <p style="color: #555;">{{ $p->Deskripsi ?? 'Tidak ada deskripsi.' }}</p>
-                <p style="font-size: 13px; color: #777;">📍 {{ $p->Alamat_Penjual }}</p>
-
-                <div style="margin-top: 10px;">
-                    <a href="{{ route('penjual.detail', $p->Id_Penjual) }}" 
-                       style="display: inline-block; padding: 6px 10px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
-                       Detail
-                    </a>
-
-                    <a href="{{ route('ulasan.create', $p->Id_Penjual) }}" 
-                       style="display: inline-block; padding: 6px 10px; background-color: #0d6efd; color: white; text-decoration: none; border-radius: 4px; font-size: 14px; margin-left: 5px;">
-                       Ulas
-                    </a>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        @forelse($penjualList as $i => $p)
+            @php $rata = $p->ulasan->avg('Rating') ?? 0; @endphp
+            <div class="kartu-penjual border border-[#dde1ea] rounded-[40px] p-3 bg-white"
+                 data-nama="{{ strtolower($p->Nama_Penjual . ' ' . $p->Alamat_Penjual) }}">
+                <div class="h-[116px] rounded-[26px] bg-[linear-gradient(180deg,#82b4ff,#cfc4ff)] grid place-items-center text-[#2878eb] font-bold text-xl">
+                    FOTO {{ $i + 1 }}
                 </div>
+                <h3 class="text-base font-bold mt-4 mx-1 mb-2">{{ $p->Nama_Penjual }}</h3>
+                <small class="block text-sm text-[#6b7385] mx-1 mb-3.5 line-clamp-1">{{ $p->Alamat_Penjual }}</small>
+                <p class="text-[#f5a623] font-['Libre_Baskerville',serif] text-sm mx-1 mb-2.5">
+                    ★ {{ number_format($rata, 1) }} ({{ $p->ulasan->count() }} ulasan)
+                </p>
+                <a href="{{ route('penjual.detail', $p->Id_Penjual) }}"
+                   class="block w-full text-center py-2.5 rounded-lg font-bold border border-[#2878eb] text-[#2878eb] bg-white">Lihat Detail</a>
             </div>
         @empty
-            <p>Belum ada data penjual terdaftar.</p>
+            <p class="col-span-full py-8 text-center text-[#6b7385]">Belum ada data penjual terdaftar.</p>
         @endforelse
     </div>
 
-</body>
-</html>
+    <p id="tidakAda" class="hidden py-8 text-center text-[#6b7385]">Penjual tidak ditemukan.</p>
+</section>
+
+<script>
+    document.getElementById('cari').addEventListener('input', function () {
+        const q = this.value.toLowerCase().trim();
+        let ada = false;
+        document.querySelectorAll('.kartu-penjual').forEach(function (k) {
+            const cocok = k.dataset.nama.includes(q);
+            k.classList.toggle('hidden', !cocok);
+            if (cocok) ada = true;
+        });
+        document.getElementById('tidakAda').classList.toggle('hidden', ada || q === '');
+    });
+</script>
+@endsection

@@ -1,42 +1,36 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Ulasan Toko</title>
-</head>
-<body style="font-family: sans-serif; padding: 20px;">
+@extends('layouts.penjual')
+@section('title', 'Ulasan Pelanggan')
 
-    <!-- NAVBAR PENJUAL -->
-    <nav style="background-color: #333; padding: 10px 20px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; gap: 15px;">
-            <a href="{{ route('homePenjual') }}" style="color: white; text-decoration: none;">Dashboard</a>
-            <a href="{{ route('penjual.edit') }}" style="color: white; text-decoration: none;">Profil & Edit Toko</a>
-            <a href="{{ route('penjual.ulasan') }}" style="color: white; text-decoration: none; font-weight: bold;">Lihat Ulasan</a>
-        </div>
-        
-        <form action="{{ route('auth.logout') }}" method="POST" style="margin: 0;">
-            @csrf
-            <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Logout</button>
-        </form>
-    </nav>
+@section('isi')
+@php $ulasanList = $penjual?->ulasan ?? collect(); @endphp
 
-    <h2>Daftar Ulasan Pembeli</h2>
+<h1 class="text-3xl font-bold mb-1.5">Ulasan Pelanggan</h1>
+<p class="text-sm text-[#6b7385] mb-7">Semua ulasan yang masuk ke toko.</p>
 
-    <div style="max-width: 600px;">
-        @forelse($penjual->ulasan ?? [] as $u)
-            <div style="border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 6px; background-color: #f9f9f9;">
-                <div style="display: flex; justify-content: space-between;">
-                    <strong>{{ $u->Nama_Pembeli }}</strong>
-                    <span style="color: #f39c12; font-weight: bold;">Rating: {{ $u->Rating }}/5 ⭐</span>
-                </div>
-                <p style="margin: 8px 0;">{{ $u->Ulasan }}</p>
-                <small style="color: #777;">{{ $u->created_at ? $u->created_at->format('d M Y, H:i') : '' }}</small>
-            </div>
-        @empty
-            <p style="color: #666;">Belum ada ulasan yang masuk untuk toko Anda.</p>
-        @endforelse
+<div class="border border-[#dde1ea] rounded-[40px] p-7 bg-white">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr>
+                    <th class="text-left px-3 py-2.5">Nama Pembeli</th>
+                    <th class="text-left px-3 py-2.5">Rating</th>
+                    <th class="text-left px-3 py-2.5">Komentar</th>
+                    <th class="text-right px-3 py-2.5">Tanggal</th>
+                </tr>
+            </thead>
+            <tbody>
+            @forelse($ulasanList->sortByDesc('created_at') as $u)
+                <tr>
+                    <td class="px-3 py-5 border-t border-[#dde1ea]">{{ $u->Nama_Pembeli }}</td>
+                    <td class="px-3 py-5 border-t border-[#dde1ea] text-[#f5a623]">{{ str_repeat('★', $u->Rating) }}</td>
+                    <td class="px-3 py-5 border-t border-[#dde1ea]">{{ $u->Ulasan }}</td>
+                    <td class="px-3 py-5 border-t border-[#dde1ea] text-right text-[#6b7385]">{{ $u->created_at?->format('d M Y, H:i') }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="4" class="py-8 text-center text-[#6b7385]">Belum ada ulasan yang masuk untuk toko Anda.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
     </div>
-
-</body>
-</html>
+</div>
+@endsection

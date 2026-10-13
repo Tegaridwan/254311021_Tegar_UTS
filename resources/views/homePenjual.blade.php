@@ -1,55 +1,70 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Penjual</title>
-</head>
-<body style="font-family: sans-serif; padding: 20px;">
+@extends('layouts.penjual')
+@section('title', 'Dashboard')
 
-    <!-- NAVBAR PENJUAL -->
-    <nav style="background-color: #333; padding: 10px 20px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; gap: 15px;">
-            <a href="{{ route('homePenjual') }}" style="color: white; text-decoration: none; font-weight: bold;">Dashboard</a>
-            <a href="{{ route('penjual.edit') }}" style="color: white; text-decoration: none;">Profil & Edit Toko</a>
-            <a href="{{ route('penjual.ulasan') }}" style="color: white; text-decoration: none;">Lihat Ulasan</a>
+@section('isi')
+@php
+    $ulasanList = $penjual?->ulasan ?? collect();
+@endphp
+
+<h1 class="text-3xl font-bold mb-1.5">Dashboard</h1>
+<p class="text-sm text-[#6b7385] mb-7">Ringkasan aktivitas toko dan ulasan terbaru.</p>
+
+@if(session('success'))
+    <div class="px-4 py-3 rounded-[10px] mb-5 text-sm bg-[#e6f6ed] text-[#22a35a]">{{ session('success') }}</div>
+@endif
+
+@if(!$penjual)
+    <div class="max-w-[520px] border border-[#ffc107] bg-[#fff3cd] rounded-[24px] p-6">
+        <h3 class="text-lg font-bold mb-1">Data Toko Belum Lengkap</h3>
+        <p class="text-sm mb-4">Silakan lengkapi informasi toko Anda terlebih dahulu.</p>
+        <a href="{{ route('penjual.edit') }}" class="inline-block px-5 py-2.5 rounded-lg font-bold bg-[#2878eb] text-white">Lengkapi Data Sekarang</a>
+    </div>
+@else
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div class="border border-[#dde1ea] rounded-[28px] p-6">
+            <small class="text-[13px] text-[#6b7385]">Total Ulasan</small>
+            <h2 class="text-4xl font-bold mt-3.5 mb-2.5">{{ $ulasanList->count() }}</h2>
         </div>
-        
-        <form action="{{ route('auth.logout') }}" method="POST" style="margin: 0;">
-            @csrf
-            <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Logout</button>
-        </form>
-    </nav>
-
-    <h2>Selamat Datang di Home Penjual</h2>
-
-    @if(session('success'))
-        <div style="color: green; margin-bottom: 15px; font-weight: bold;">
-            {{ session('success') }}
+        <div class="border border-[#dde1ea] rounded-[28px] p-6">
+            <small class="text-[13px] text-[#6b7385]">Rata-rata Rating</small>
+            <h2 class="text-4xl font-bold mt-3.5 mb-2.5">{{ number_format($ulasanList->avg('Rating') ?? 0, 1) }}</h2>
+            <span class="text-[#f5a623]">{{ str_repeat('★', (int) round($ulasanList->avg('Rating') ?? 0)) }}</span>
         </div>
-    @endif
-
-    @if($penjual)
-        <div style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 500px; background-color: #f9f9f9;">
-            <h3 style="margin-top: 0;">Informasi Toko Anda</h3>
-            <p><strong>Nama Toko:</strong> {{ $penjual->Nama_Penjual }}</p>
-            <p><strong>Deskripsi:</strong> {{ $penjual->Deskripsi ?? '-' }}</p>
-            <p><strong>Alamat:</strong> {{ $penjual->Alamat_Penjual }}</p>
-            <p><strong>No Telepon:</strong> {{ $penjual->No_Telp_Penjual }}</p>
-            
-            <a href="{{ route('penjual.edit') }}" style="display: inline-block; padding: 8px 15px; background-color: #0d6efd; color: white; text-decoration: none; border-radius: 4px; margin-top: 10px;">
-                Edit Data Toko
-            </a>
+        <div class="border border-[#dde1ea] rounded-[28px] p-6">
+            <small class="text-[13px] text-[#6b7385]">Ulasan Bintang 5</small>
+            <h2 class="text-4xl font-bold mt-3.5 mb-2.5">{{ $ulasanList->where('Rating', 5)->count() }}</h2>
         </div>
-    @else
-        <div style="border: 1px solid #ffc107; padding: 15px; background-color: #fff3cd; border-radius: 6px; max-width: 500px;">
-            <h3>Data Toko Belum Lengkap</h3>
-            <p>Silakan lengkapi informasi toko Anda terlebih dahulu.</p>
-            <a href="{{ route('penjual.edit') }}" style="display: inline-block; padding: 8px 15px; background-color: #198754; color: white; text-decoration: none; border-radius: 4px;">
-                Lengkapi Data Sekarang
-            </a>
-        </div>
-    @endif
+    </div>
 
-</body>
-</html>
+    <div class="border border-[#dde1ea] rounded-[40px] p-7 bg-white mb-6">
+        <h2 class="text-[22px] font-bold mb-4">Informasi Toko Anda</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6 text-sm">
+            <div><small class="block text-xs font-bold text-[#6b7385] mb-2">Nama Toko</small>{{ $penjual->Nama_Penjual }}</div>
+            <div><small class="block text-xs font-bold text-[#6b7385] mb-2">Alamat</small>{{ $penjual->Alamat_Penjual }}</div>
+            <div><small class="block text-xs font-bold text-[#6b7385] mb-2">No. Telepon</small>{{ $penjual->No_Telp_Penjual }}</div>
+            <div><small class="block text-xs font-bold text-[#6b7385] mb-2">Deskripsi</small>{{ $penjual->Deskripsi ?? '-' }}</div>
+        </div>
+        <a href="{{ route('penjual.edit') }}" class="inline-block mt-6 px-5 py-2.5 rounded-lg font-bold bg-[#2878eb] text-white">Edit Data Toko</a>
+    </div>
+
+    <div class="border border-[#dde1ea] rounded-[40px] p-7 bg-white">
+        <h2 class="text-[22px] font-bold mb-4">Ulasan Terbaru</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <tbody>
+                @forelse($ulasanList->sortByDesc('created_at')->take(4) as $u)
+                    <tr>
+                        <td class="px-3 py-5 border-t border-[#dde1ea] font-bold">{{ $u->Nama_Pembeli }}</td>
+                        <td class="px-3 py-5 border-t border-[#dde1ea] text-[#f5a623]">{{ str_repeat('★', $u->Rating) }}</td>
+                        <td class="px-3 py-5 border-t border-[#dde1ea]">{{ $u->Ulasan }}</td>
+                        <td class="px-3 py-5 border-t border-[#dde1ea] text-right text-[#6b7385]">{{ $u->created_at?->locale('id')->diffForHumans() }}</td>
+                    </tr>
+                @empty
+                    <tr><td class="py-8 text-center text-[#6b7385]">Belum ada ulasan.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endif
+@endsection
