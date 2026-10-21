@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('ulasan.store') }}" class="space-y-4">
+    <form method="POST" action="{{ route('ulasan.store') }}" enctype="multipart/form-data" class="space-y-4">
         @csrf
         <input type="hidden" name="Id_Penjual" value="{{ $penjual->Id_Penjual }}">
 
@@ -35,6 +35,14 @@
                     <option value="{{ $rating }}" @selected(old('Rating') == $rating)>{{ $rating }} bintang</option>
                 @endforeach
             </select>
+        </div>
+
+        <div>
+            <label for="foto_ulasan" class="block text-sm font-bold mb-1.5 bg-[#2878eb] text-white py-2 px-4 rounded-lg">
+                Foto Ulasan (Opsional)
+            </label>
+            <input id="foto_ulasan" name="foto_ulasan" type="file" accept="image/*"
+                class="w-full px-3 py-2.5 border border-[#dde1ea] rounded-lg outline-none">
         </div>
 
         <div>

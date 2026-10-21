@@ -41,14 +41,21 @@
                             <b class="block mb-1">{{ $u->Nama_Pembeli }}</b>
                             <span class="text-[#f5a623]">{{ str_repeat('★', $u->Rating) }}</span>
                             <p class="mt-1 text-gray-800">{{ $u->Ulasan }}</p>
-
-                            {{-- Menampilkan balasan penjual jika sudah ada --}}
-                            @if($u->respon)
+                            <img src="{{ $u->foto_ulasan ? asset('storage/' . $u->foto_ulasan) : '' }}" alt="Foto Ulasan" class="mt-2 max-w-[100px] rounded-lg {{ $u->foto_ulasan ? '' : 'hidden' }}">
+                            {{-- Menampilkan balasan penjual jika sudah ada dari tabel respon --}}
+                            @if($u->balasan)
                                 <div class="mt-3 p-3 bg-gray-50 rounded-xl border border-[#dde1ea] text-xs text-gray-700">
                                     <span class="font-bold text-gray-900 block mb-0.5">Balasan dari Penjual:</span>
-                                    {{ $u->respon->Respon }}
+                                    {{ $u->balasan->Respon }}
                                 </div>
                             @endif
+                            <button class="lapor-ulasan-btn mt-2 text-red-600 hover:text-red-800 text-sm font-semibold" data-ulasan-id="{{ $u->Id_Ulasan }}">Laporkan Ulasan</button>
+                            <form action="{{ route('laporan-ulasan.store') }}" method="POST" class="lapor-ulasan-form mt-2 hidden" id="lapor-ulasan-form-{{ $u->Id_Ulasan }}">
+                                @csrf
+                                <input type="hidden" name="Id_Ulasan" value="{{ $u->Id_Ulasan }}">
+                                <input type="text" name="Alasan" placeholder="Alasan laporan" class="border border-[#dde1ea] rounded px-2.5 py-1.5 text-xs w-full focus:outline-none focus:border-black" required>
+                                <button type="submit" class="bg-black text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-800 transition mt-1">Kirim Laporan</button>
+                            </form>
                         </div>
                         <span class="text-xs text-[#6b7385] whitespace-nowrap">{{ $u->created_at?->locale('id')->diffForHumans() }}</span>
                     </div>
@@ -82,6 +89,22 @@
         extra.forEach(function (el) { el.classList.toggle('hidden', !sembunyi); });
         btn.textContent = sembunyi ? 'Tampilkan Lebih Sedikit' : 'Lihat Selengkapnya (' + sisa + ' ulasan lagi)';
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const laporButtons = document.querySelectorAll('.lapor-ulasan-btn');
+
+    laporButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const ulasanId = this.getAttribute('data-ulasan-id');
+            const form = document.getElementById('lapor-ulasan-form-' + ulasanId);
+
+            if (form) {
+                // Toggle kelas hidden
+                form.classList.toggle('hidden');
+            }
+        });
+    });
+});
 </script>
 @endif
 @endsection

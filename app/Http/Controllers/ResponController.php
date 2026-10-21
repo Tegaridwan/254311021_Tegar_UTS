@@ -51,7 +51,8 @@ class ResponController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $data = Respon::findOrFail($id);
+        return view('edit-respon', compact('data'));
     }
 
     /**
@@ -59,7 +60,14 @@ class ResponController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validatedData = $request->validate([
+            'Respon' => 'required|string|max:255',
+        ]);
+
+        $respon = Respon::findOrFail($id);
+        $respon->update($validatedData);
+
+        return redirect()->back()->with('success', 'Respon berhasil diperbarui!');
     }
 
     /**
@@ -67,6 +75,9 @@ class ResponController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $respon = Respon::findOrFail($id);
+        $respon->delete();
+
+        return redirect()->back()->with('success', 'Respon berhasil dihapus!');
     }
 }

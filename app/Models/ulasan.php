@@ -13,6 +13,7 @@ class ulasan extends Model
         'Id_Penjual',
         'Nama_Pembeli',
         'Ulasan',
+        'foto_ulasan',
         'Rating',
     ];
 
@@ -22,9 +23,15 @@ class ulasan extends Model
         return $this->belongsTo(penjual::class, 'Id_Penjual', 'Id_Penjual');
     }
 
-    // --- TAMBAHKAN FUNGSI INI AGAR BISA TERHUBUNG KE TABEL RESPON ---
-    public function respon()
+    // Relasi ke tabel respon
+    public function balasan()
     {
         return $this->hasOne(Respon::class, 'Id_Respon', 'Id_Ulasan');
+    }
+
+    // Relasi ke tabel laporan ulasan
+    public function laporan()
+    {
+        return $this->hasMany(LaporanUlasan::class, 'Id_Ulasan', 'Id_Ulasan');
     }
 }

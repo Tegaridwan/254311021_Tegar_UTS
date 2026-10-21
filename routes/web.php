@@ -6,6 +6,8 @@ use App\Http\Controllers\TambahUlasanController;
 use App\Models\penjual;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ResponController;
+use App\Http\Controllers\LaporanUlasanController;
 
 // 1. Route Beranda / Dashboard Pembeli
 Route::get('/', function () {
@@ -43,6 +45,8 @@ Route::middleware('auth')->group(function () {
         return view('ViewUlasan', compact('penjual'));
     })->name('penjual.ulasan');
 
+    Route::delete('/penjual/ulasan/{id}/hapus', [TambahUlasanController::class, 'destroy'])->name('ulasan.destroy');
+
     // Proses Simpan / Update Data Penjual
     Route::post('simpan-penjual', [penjualController::class, 'store'])->name('penjual.store');
 });
@@ -58,8 +62,13 @@ Route::get('/ulasan/{id}', function ($id) {
     return view('formulasan', compact('penjual'));
 })->name('ulasan.create');
 
-use App\Http\Controllers\ResponController;
+//laporan ulasan
+Route::post('/laporan-ulasan', [LaporanUlasanController::class, 'store'])->name('laporan-ulasan.store');
 
+
+// 5. Routes untuk Respon Penjual
 Route::post('/respon', [ResponController::class, 'store'])->name('respon.store');
-
+Route::get('/respon/{id}/edit', [ResponController::class, 'edit'])->name('respon.edit');
+Route::put('/respon/{id}', [ResponController::class, 'update'])->name('respon.update');
+Route::delete('/respon/{id}', [ResponController::class, 'destroy'])->name('respon.destroy');
 Route::post('/ulasan', [TambahUlasanController::class, 'store'])->name('ulasan.store');

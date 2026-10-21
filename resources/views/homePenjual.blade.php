@@ -57,6 +57,9 @@
                         <td class="px-3 py-5 border-t border-[#dde1ea] font-bold">{{ $u->Nama_Pembeli }}</td>
                         <td class="px-3 py-5 border-t border-[#dde1ea] text-[#f5a623]">{{ str_repeat('★', $u->Rating) }}</td>
                         <td class="px-3 py-5 border-t border-[#dde1ea]">{{ $u->Ulasan }}</td>
+                        <td class="px-3 py-5 border-t border-[#dde1ea] text-right text-[#6b7385]">
+                            <img src="{{ $u->foto_ulasan ? asset('storage/' . $u->foto_ulasan) : '' }}" alt="Foto Ulasan" class="mt-2 max-w-[100px] rounded-lg {{ $u->foto_ulasan ? '' : 'hidden' }}">
+                        </td>
                         <td class="px-3 py-5 border-t border-[#dde1ea] text-right text-[#6b7385]">{{ $u->created_at?->locale('id')->diffForHumans() }}</td>
                     </tr>
                 @empty
