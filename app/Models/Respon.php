@@ -11,6 +11,7 @@ class Respon extends Model
     protected $fillable = [
         'Id_Respon',
         'Respon',
+        'Tanggal_Respon',
     ];
     public function ulasan()
     {

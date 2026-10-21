@@ -31,6 +31,7 @@ class ResponController extends Controller
         $validatedData = $request->validate([
             'Id_Respon' => 'required|exists:ulasan,Id_Ulasan',
             'Respon' => 'required|string|max:255',
+            'Tanggal_Respon' => 'required|date',
         ]);
 
         Respon::create($validatedData);

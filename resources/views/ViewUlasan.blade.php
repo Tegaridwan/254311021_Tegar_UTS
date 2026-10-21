@@ -44,13 +44,25 @@
                         {{-- Jika ulasan sudah direspon, tampilkan balasannya dari tabel respon. Jika belum, tampilkan form input respon --}}
                         @if($u->balasan)
                             <div class="mt-2 p-2.5 bg-gray-50 rounded-lg text-xs text-gray-700 border border-[#dde1ea]">
-                                <input type="text" name="Id_Respon" value="{{ $u->balasan->Respon }}" readonly>
+                                <div class="font-medium text-gray-800 mb-1">Balasan:</div>
+                                <div>{{ $u->balasan->Respon }}</div>
+                                <div class="text-[10px] text-gray-400 mt-1">
+                                    {{ $u->balasan?->Tanggal_Respon ? \Carbon\Carbon::parse($u->balasan->Tanggal_Respon)->translatedFormat('d M Y, H:i') : 'Tanggal tidak tersedia' }}
+                                </div>
                             </div>
                             <button class="edit-respon-btn mt-2 text-blue-600 hover:text-blue-800 text-sm font-semibold" data-ulasan-id="{{ $u->Id_Ulasan }}">Edit Balasan</button>
                             <form action="{{ route('respon.update', $u->balasan->Id_Respon) }}" method="POST" class="mt-2 hidden" id="respon-form-{{ $u->Id_Ulasan }}">
                                 @csrf
                                 @method('PUT')
+                                @php
+                                    $tanggalResponValue = $u->balasan?->Tanggal_Respon;
+                                    $tanggalResponValue = $tanggalResponValue instanceof \Carbon\Carbon
+                                        ? $tanggalResponValue->format('Y-m-d\TH:i')
+                                        : ($tanggalResponValue ? \Carbon\Carbon::parse($tanggalResponValue)->format('Y-m-d\TH:i') : now()->format('Y-m-d\TH:i'));
+                                @endphp
                                 <input type="text" name="Respon" value="{{ $u->balasan->Respon }}" class="border border-[#dde1ea] rounded px-2.5 py-1.5 text-xs w-full focus:outline-none focus:border-black" required>
+                                <label for="Tanggal_Respon" class="sr-only">Tanggal Respon</label>
+                                <input type="datetime-local" name="Tanggal_Respon" value="{{ $tanggalResponValue }}" class="border border-[#dde1ea] rounded px-2.5 py-1.5 text-xs w-40 focus:outline-none focus:border-black" required>
                                 <button type="submit" class="bg-black text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-800 transition mt-1">Simpan</button>
                             </form>
                             <form action="{{ route('respon.destroy', $u->balasan->Id_Respon) }}" method="POST" class="inline-block ml-2" onsubmit="return confirm('Apakah Anda yakin ingin menghapus balasan ini?');">
@@ -63,6 +75,8 @@
                                 @csrf
                                 <input type="hidden" name="Id_Respon" value="{{ $u->Id_Ulasan }}">
                                 <input type="text" name="Respon" placeholder="Tulis balasan..." class="border border-[#dde1ea] rounded px-2.5 py-1.5 text-xs w-full focus:outline-none focus:border-black" required>
+                                <label for="Tanggal_Respon" class="sr-only">Tanggal Respon</label>
+                                <input type="datetime-local" name="Tanggal_Respon" value="{{ now()->format('Y-m-d\TH:i') }}" class="border border-[#dde1ea] rounded px-2.5 py-1.5 text-xs w-40 focus:outline-none focus:border-black" required>
                                 <button type="submit" class="bg-black text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-800 transition">Kirim</button>
                             </form>
                         @endif
