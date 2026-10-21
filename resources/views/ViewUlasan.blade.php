@@ -88,7 +88,7 @@
                             </div>
                         @else
                             <span class="inline-block bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold border border-green-200">
-                                Bersih
+                                Bersihhh
                             </span>
                         @endif
                     </td>
